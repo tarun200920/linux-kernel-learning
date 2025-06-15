@@ -57,7 +57,7 @@ struct list_element {
 		struct fox *next;          /* next fox in linked list */
 		struct fox *prev;          /* previous fox in linked list */
 	};
-```
+	```
 	- The Linux Kernel approach is different. Instead of turning the structure into a linked list, the Linux approach is to *embed a linked list node in the structure*.
 
 - #### The Linked List Structure
@@ -65,27 +65,27 @@ struct list_element {
 	- This linked list node can be embedded in a parent structure which has the actual data.
 	- All linked list operations only operate on the linked list nodes without consideration of the parent structure. Therefore, additional manipulation using `list_entry()` is needed to operate on the parent structure of each linked list node.
 	- The linked-list code is declared in the header file `<linux/list.h>` and the data structure is simple:
-	  ```c
+	```c
 	struct list_head {
 		struct list_head *next
 		struct list_head *prev;
 	};
-```
+	```
 	- The `next` pointer points to the next list node, and the `prev` pointer points to the previous list node. Yet, seemingly, this is not particularly useful. The utility is in *how* the `list_head` structure is used:
-	  ```c
+  ```c
 	struct fox {
 		unsigned long tail_length; /* length in centimeters of tail */
 		unsigned long weight;      /* weight in kilograms */
 		bool is_fantastic;         /* is this fox fantastic? */
 		struct list_head list;     /* list of all fox structures */
 	};
-```
+	```
 	- With this, `list.next` in `fox` points to the next element, and `list.prev` in `fox` points to the previous. Now this is becoming useful, but it gets better.
 	- The kernel provides a family of routines to manipulate linked lists. These methods are generic and accept only `list_head` structures.
 		- `list_add()` - adds a new node to the existing linked list.
 		```c
 		static inline void list_add(struct list_head *new,
-													struct list_head *head)
+							struct list_head *head)
 		{
 	        __list_add(new, head, head->next);
 		}
@@ -352,7 +352,8 @@ while(kfifo_avail(fifo)) {
 		return -EINVAL;
 	}
 	printk(KERN_INFO "%u\n", val);
-}```
+}
+```
 
 - The above test code prints 0 through 31, inclusive, and in that order.
 	**Note:** If the above code snippet printed the numbers backward, from 31 to 0, we would have a stack not a queue.
