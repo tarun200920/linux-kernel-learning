@@ -112,82 +112,82 @@ struct list_element {
 - #### Defining a Linked List
 	- As shown previously, a `list_head` by itself is worthless; it is normally embedded inside your own structure:
 	  ```c
-	struct fox {
+		struct fox {
 		unsigned long tail_length; /* length in centimeters of tail */
 		unsigned long weight;      /* weight in kilograms */
 		bool is_fantastic;         /* is this fox fantastic? */
 		struct list_head list;     /* list of all fox structures */
 	};
-		```
+	  ```
 	- The list needs to be initialized before it can be used. This can be done in two ways:
 		1. Runtime: The most common way of linked list initialization.
-		```c
-		struct fox *red_fox;
-		red_fox = kmalloc(sizeof(*red_fox), GFP_KERNEL);
-		red_fox.tail_length = 40;
-		red_fox.weight = 6;
-		red_fox.is_fantastic = false;
-		INIT_LIST_HEAD(&red_fox->list);
-		```
+		   ```c
+			struct fox *red_fox;
+			red_fox = kmalloc(sizeof(*red_fox), GFP_KERNEL);
+			red_fox.tail_length = 40;
+			red_fox.weight = 6;
+			red_fox.is_fantastic = false;
+			INIT_LIST_HEAD(&red_fox->list);
+		   ```
 		2. Compile Time: If the structure is statically created at compile time, and you have the direct reference to it:
 		   ```c
-		struct fox red_fox = {
+			struct fox red_fox = {
 			.tail_length = 40,
 			.weight = 6,
 			.is_fantastic = false,
 			.list = INIT_LIST_HEAD(red_fox.list),
 		};
-```
+		   ```
 
 - #### List Heads
 	- So far we understood how to create a linked list and how to manage it using kernel's linked list routines. But, to use these routines, we need a canonical pointer to refer to the list as a whole - a *head* pointer.
-	```c
-	static LIST_HEAD(fox_list);
-	```
+	  ```c
+	  static LIST_HEAD(fox_list);
+	  ```
 	- `LIST_HEAD()` defines and initializes a `list_head` named `fox_list`.
 
 - #### Manipulating Linked Lists
 	- ##### Adding a Node to a Linked List
 		- `list_add()` function adds the new node to the given list immediately *after* the `head` node.
-		```c
-		list_add(struct list_head *new, struct list_head *head)
-		```
+		  ```c
+		  list_add(struct list_head *new, struct list_head *head)
+		  ```
 		- For example: If we want to add a new `struct fox` to the `fox_list` list,
-			```c
-			list_add(&f->list, &fox_list);
-			```
+		  ```c
+		  list_add(&f->list, &fox_list);
+		  ```
 		- To add a node at the end of the list:
-		```c
-			list_add_tail(struct list_head *new, struct list_head *head)
-		```
+		  ```c
+		  list_add_tail(struct list_head *new, struct list_head *head)
+		  ```
 
 	- ##### Deleting a Node from a Linked List
 		- `list_del()` function removes the `element` entry from the list. It doesn't free the memory used by the node.
-	```c
-		list_del(struct list_head *entry)
-	```
+		  ```c
+		  list_del(struct list_head *entry)
+		  ```
 
 	- ##### Moving and Splicing (Joining) Linked List Nodes
 		-  `list_move()` - To move a node from one list to another. This function removes the `list` entry from its linked list and adds it to the given list the *after* the `head` element.
-		```c
-		list_move(struct list_head *list, struct list_head *head)
-```
+		  ```c
+		  list_move(struct list_head *list, struct list_head *head)
+		  ```
 		- `list_move_tail()` - To move a node from one list to the end of another. This function does the same as list_move(), but inserts the `list` element *before* the `head` entry.
-		```c
-		list_move_tail(struct list_head *list, struct list_head *head)
-```
+		  ```c
+		  list_move_tail(struct list_head *list, struct list_head *head)
+		  ```
 		- `list_empty()` - To check whether a list is empty. This returns non-zero if the given list is empty.
-		```c
-		list_empty(struct list_head *head)
-```
+		  ```c
+		  list_empty(struct list_head *head)
+		  ```
 		- `list_splice()` - To splice to unconnected lists together. This function splices together two lists by inserting the list pointed to by `list` to the given list after the element `head`.
-		```c
-		list_splice(struct list_head *list, struct list_head *head)
-```
+		  ```c
+		  list_splice(struct list_head *list, struct list_head *head)
+		  ```
 		- `list_splice_init()` - To splice two unconnected lists together and reinitialize the old list. This function works the same as `list_splice()`, except that the emptied list pointed to by `list` is reinitialized.
-		```c
-		list_splice_init(struct list_head *list, struct list_head *head)
-```
+		  ```c
+		  list_splice_init(struct list_head *list, struct list_head *head)
+		  ```
 
 - #### Traversing Linked Lists
 	- list_for_each() is used to traverse over linked list
@@ -204,7 +204,7 @@ struct list_element {
 	        for (pos = list_first_entry(head, typeof(*pos), member);        \
 	             !list_entry_is_head(pos, head, member);                    \
 	             pos = list_next_entry(pos, member))
-	```
+	  ```
 	- Here `pos` is the pointer to the object containing the `list_head` nodes. Think of it as a return value from `list_entry()`.
 	- `head` is a pointer (like `fox_list` in our example) to the `list_head` head node from which the iteration to be started.
 	- `member` is the variable name of the `list_head` structure in `pos`.
@@ -232,7 +232,7 @@ struct list_element {
 	                n = list_next_entry(pos, member);                       \
 	             !list_entry_is_head(pos, head, member);                    \
 	             pos = n, n = list_next_entry(n, member))
-```
+	  ```
 	- This macro can be used in the same manner as `list_for_each_enty()` except that you provide the `next` pointer, which is of the same type as `pos`.
 	- The next pointer is used by the macro `list_for_each_entry_safe()` to store the next entry in the list, making it safe to remove the current entry.
 
@@ -267,50 +267,53 @@ struct list_element {
 	- To use a kfifo, it must be defined first and then initialized. As with most kernel objects, this can be done statically (less common method) or dynamically (most common method):
 	1. Statically:
 	   This creates a static kfifo named `name` with a queue of `size` bytes.
-	    ```c
+	   ```c
 		DECLARE_KFIFO(name, size);
 		INIT_KFIFO(name);
-		```
+	   ```
 	2. Dynamically:
 		- This creates and initializes a kfifo with a queue of `size` bytes.
 		- The kernel uses the *gfp mask* `gfp_mask` to allocate the queue. (More information on memory allocation in Chapter 12, "Memory Management")
-	   ```c
-		int kfifo_alloc(struct kfifo *fifo, unsigned int size, gfp_t gfp_mask);
-		```
+		  ```c
+		  int kfifo_alloc(struct kfifo *fifo, unsigned int size, gfp_t gfp_mask);
+		  ```
 		- If we want to allocate the buffer our-self, we can use `kfifio_init()`.
 		- This function creates and initializes a a kfifo that will use the `size` bytes of memory pointed at by `buffer` for its queue.
-		```c
-		void kfifo_init(struct kfifo *fifo, void *buffer, unsigned int size);
-		```
+		  ```c
+		  void kfifo_init(struct kfifo *fifo, void *buffer, unsigned int size);
+		  ```
 - **NOTE:** The `size` must be a power of 2.
 
 - #### Enqueue Data
 	- `kfifo_in()`: It copies the `len` bytes of data starting at `from` into the queue `fifo` starting from *in offset*.
-	```c
-unsigned int kfifo_in(struct kfifo *fifo, const void *from, unsigned int len);
-```
+	  ```c
+	unsigned int kfifo_in(struct kfifo *fifo, const void *from,
+												unsigned int len);
+	  ```
 	- The function returns the number of bytes copied into the queue depending on the number of bytes free in the queue. If nothing was copied it will return 0.
 
 - #### Dequeue Data
 	- `kfifo_out()`: It copies at most `len` bytes starting from *out offset* from the queue `fifo` to the buffer pointed at by `to`.
-	```c
-unsigned int kfifo_in(struct kfifo *fifo, const void *from, unsigned int len);
-```
+	  ```c
+	  unsigned int kfifo_in(struct kfifo *fifo, const void *from,
+												  unsigned int len);
+	  ```
 	- The function returns the number of bytes copied depending on the number of occupied bytes present in the queue.
 	- After dequeued, the data is no longer accessible from the queue.
 
 - #### Peek Data without Dequeue
 	- `kfifo_out_peek()`: It works same as `kfifo_out`, except that the *out offset* is not incremented.
-	```c
-	unsigned int kfifo_out_peek(struct kfifo *fifo, void *to, unsigned int len, unsigned offset);
-```
+	  ```c
+	  unsigned int kfifo_out_peek(struct kfifo *fifo, void *to,
+								  unsigned int len, unsigned offset);
+	  ```
 	- The parameter `offset` specifies an index in the queue; specify 0 to read from the head of the queue, as `kfifo_out()` does.
 
 - #### Obtaining the size of the Queue
 	- `kfifo_size()`: It returns the total size in bytes of the buffer used to store kfifo's queue.
-	```c
-static inline unsigned int kfifo_size(struct kfifo *fifo);
-```
+	  ```c
+	  static inline unsigned int kfifo_size(struct kfifo *fifo);
+	  ```
 
 - #### Other functions to access information about the Queue
 	- `kfifo_len()`: Obtain number of bytes enqueued in the queue.
@@ -325,35 +328,34 @@ static inline unsigned int kfifo_size(struct kfifo *fifo);
 - #### Example Queue Usage
 	- Assume we created a kfifo pointed at `fifo` with a queue size of 8KB.
 	- In this example, we will enqueue simple integers (In reality, it would more complicated, task-specific structures), peek the queue, and the dequeue them.
-```c
-unsigned int i;
-/* enqueue [0, 32) to the kfifo named 'fifo' */
-for (i = 0; i < 32; i++) {
-	kfifo_in(fifo, &i, sizeof(i));
-}
-// The kfifo named 'fifo' now contains 0 through 31, inclusive.
-// We can peek at the first item at the queue and verify it is 0.
-unsigned int val;
-int ret;
-ret = kfifo_peek_out(fifo, &val, sizeof(val), 0);
-if (ret != sizeof(val)) {
-	return -EINVAL;
-}
-printk(KERN_INFO "First item in the queue is %d\n", val); /* should print 0 */
-
-// Now, dequeue all the items from the queue
-/* while there is data in the queue */
-while(kfifo_avail(fifo)) {
+	  ```c
+	unsigned int i;
+	/* enqueue [0, 32) to the kfifo named 'fifo' */
+	for (i = 0; i < 32; i++) {
+		kfifo_in(fifo, &i, sizeof(i));
+	}
+	// The kfifo named 'fifo' now contains 0 through 31, inclusive.
+	// We can peek at the first item at the queue and verify it is 0.
 	unsigned int val;
 	int ret;
-	/* read it, one integer at at time */
-	ret = kfifo_out(fifo, &val, sizeof(val));
+	ret = kfifo_peek_out(fifo, &val, sizeof(val), 0);
 	if (ret != sizeof(val)) {
 		return -EINVAL;
 	}
-	printk(KERN_INFO "%u\n", val);
-}
-```
+	printk(KERN_INFO "First item in the queue is %d\n", val); /*should print 0*/
+	// Now, dequeue all the items from the queue
+	/* while there is data in the queue */
+	while(kfifo_avail(fifo)) {
+		unsigned int val;
+		int ret;
+		/* read it, one integer at at time */
+		ret = kfifo_out(fifo, &val, sizeof(val));
+		if (ret != sizeof(val)) {
+			return -EINVAL;
+		}
+		printk(KERN_INFO "%u\n", val);
+	}
+	  ```
 
 - The above test code prints 0 through 31, inclusive, and in that order.
 	**Note:** If the above code snippet printed the numbers backward, from 31 to 0, we would have a stack not a queue.
@@ -390,40 +392,41 @@ while(kfifo_avail(fifo)) {
 - #### Initializing an idr
 	- First step is to either statically define or dynamically allocate an `idr` structure, then next step is to call `idr_init()`.
 	  ```c
-	void idr_init(struct idr *idp);
-```
+	  void idr_init(struct idr *idp);
+	  ```
 	- Example:
 	  ```c
 	struct idr id_huh;     /* statically define idr structure */
 	idr_init(&id_huh);     /* initialize provided idr structure */
-```
+	  ```
 
 - #### Allocating a new UID
 	- After the idr setup, allocating a new UID is a two-step process:
 	1. Tell the idr that we want to allocate a new UID, allowing it to resize the backing tree as necessary. This may require a memory allocation, without a lock.
 	   ```c
 	   int idr_pre_get(struct idr *idp, gfp_t gfp_mask);
-		```
+	   ```
 	2. Request the new UID and add it to the idr.
 	   ```c
 	   int idr_get_new(struct idr *idp, void *ptr, int *id);
-		```
+	   ```
 		- If the caller wants the new UID to be equal or greater than provided `starting_id` then `idr_get_new_above()` can be used instead of `idr_get_new().
 		  ```c
-	int idr_get_new_above(struct idr *idp, void *ptr, int starting_id, int *id)
-		```
+		  int idr_get_new_above(struct idr *idp, void *ptr, int starting_id,
+																	  int *id)
+		  ```
 
 - #### Looking Up a UID
 	- The caller provides the UID, and the idr returns the associated pointer.
 	  ```c
 	  void *idr_find(struct idr *idp, int id);
-		```
+	  ```
 
 - #### Removing a UID
 	- To remove the UID from an idr:
 	  ```c
 	  void idr_remove(struct idr *idp, int id);
-		```
+	  ```
 
 - #### Destroying an idr
 	- A successful call to `idr_destroy()` de-allocates only unused memory associated with the idr pointer pointed by `idp`. It does not free any memory currently in use by allocated UIDs.
@@ -431,7 +434,7 @@ while(kfifo_avail(fifo)) {
 	- To force removal of all UIDs, we can call `idr_remove_all()`.
 	  ```c
 	  void idr_remove_all(struct idr *idp);
-		```
+	  ```
 		Note: We should call `idr_remove_all()` first before calling `idr_destroy()` ensuring all idr memory was freed.
 
 
@@ -473,8 +476,8 @@ while(kfifo_avail(fifo)) {
 	- The Linux provides a generic red-black tree implementation in `lib/rbtree.c` and `<linux/rbtree.h>`.
 	- The root of an rbtree is represented by the `rb_root` structure. To create a new tree, a new `rb_root` should be allocated and initialized to a special value `RB_ROOT`.
 	  ```c
-	struct rb_root root = RB_ROOT;
-```
+	  struct rb_root root = RB_ROOT;
+	  ```
 	- Individual nodes in rbtree are represented by `rb_node` structure. Given an `rb_node`, we can move to its left or right child by following pointers off the node of the same name.
 	- The rbtree implementation does not provide search and insert routines. Users of rbtrees are expected to define their own.
 
@@ -528,21 +531,21 @@ while(kfifo_avail(fifo)) {
 
 
 
-## Quick Recall
-- Q1: What is the primary advantage of using the kernel’s doubly linked list (`struct list_head`) for managing data in the Linux kernel?
-	- The primary advantage is its simplicity and O(1) time complexity for insertion and deletion at a known position, making it ideal for dynamic, sequential data such as task lists or wait queues.
-- Q2: How does the `idr` data structure in the Linux kernel ensure efficient management of unique identifiers?
-	- The `idr`, implemented as a radix tree, provides O(log n) lookup, insertion, and deletion for mapping unique IDs (e.g., PIDs) to kernel objects, with dynamic allocation to ensure uniqueness.
-- Q3: Why are red-black trees preferred over basic binary search trees in the Linux kernel for tasks like memory management?
-	- Red-black trees are self-balancing, ensuring O(log n) time complexity for search, insert, and delete operations by maintaining color-based properties, unlike basic binary search trees, which can degrade to O(n) if unbalanced.
-- Q4: What is the significance of the `kfifo` queue in the Linux kernel, and what is its typical time complexity for enqueue and dequeue operations?
-	- The `kfifo` queue provides a thread-safe, fixed-size FIFO buffer for data like event logs or interrupts, with O(1) time complexity for enqueue and dequeue operations due to its circular buffer implementation.
-- Q5: How does the concept of time complexity guide the selection of data structures in the Linux kernel?
-	- Time complexity (e.g., O(1), O(log n), O(n)) helps developers choose data structures that ensure fast, predictable performance for kernel operations, prioritizing O(1) or O(log n) for time-critical tasks like scheduling or memory lookups.
-- Q6: What factors should a kernel developer consider when choosing a data structure, according to the "What Data Structure to Use, When" section?
-	- Developers should consider the operation type (e.g., search, insert), frequency, memory constraints, concurrency requirements, and simplicity, selecting structures like linked lists for sequential data or red-black trees for ordered data.
+## **Quick Recall**
+- **Q1: What is the primary advantage of using the kernel’s doubly linked list (`struct list_head`) for managing data in the Linux kernel?**
+	- **A:** The primary advantage is its simplicity and O(1) time complexity for insertion and deletion at a known position, making it ideal for dynamic, sequential data such as task lists or wait queues.
+- **Q2: How does the `idr` data structure in the Linux kernel ensure efficient management of unique identifiers?**
+	- **A:** The `idr`, implemented as a radix tree, provides O(log n) lookup, insertion, and deletion for mapping unique IDs (e.g., PIDs) to kernel objects, with dynamic allocation to ensure uniqueness.
+- **Q3: Why are red-black trees preferred over basic binary search trees in the Linux kernel for tasks like memory management?**
+	- **A:** Red-black trees are self-balancing, ensuring O(log n) time complexity for search, insert, and delete operations by maintaining color-based properties, unlike basic binary search trees, which can degrade to O(n) if unbalanced.
+- **Q4: What is the significance of the `kfifo` queue in the Linux kernel, and what is its typical time complexity for enqueue and dequeue operations?**
+	- **A:** The `kfifo` queue provides a thread-safe, fixed-size FIFO buffer for data like event logs or interrupts, with O(1) time complexity for enqueue and dequeue operations due to its circular buffer implementation.
+- **Q5: How does the concept of time complexity guide the selection of data structures in the Linux kernel?**
+	- **A:** Time complexity (e.g., O(1), O(log n), O(n)) helps developers choose data structures that ensure fast, predictable performance for kernel operations, prioritizing O(1) or O(log n) for time-critical tasks like scheduling or memory lookups.
+- **Q6: What factors should a kernel developer consider when choosing a data structure, according to the "What Data Structure to Use, When" section?**
+	- **A:** Developers should consider the operation type (e.g., search, insert), frequency, memory constraints, concurrency requirements, and simplicity, selecting structures like linked lists for sequential data or red-black trees for ordered data.
 
-## Hands-On Ideas
+## **Hands-On Ideas**
 1. **Linked List Kernel Module for GPIO Device Tracking**
     - **Description:** Write a kernel module that uses the kernel’s doubly linked list (struct list_head) to manage a list of GPIO pins on the BBB. The module will allow users to add, remove, and list GPIO pins (e.g., used for LEDs or buttons) via a `/proc` file interface.
 2. **Kernel Queue for Button Press Events**
