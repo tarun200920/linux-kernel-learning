@@ -288,16 +288,14 @@ struct list_element {
 - #### Enqueue Data
 	- `kfifo_in()`: It copies the `len` bytes of data starting at `from` into the queue `fifo` starting from *in offset*.
 	  ```c
-			unsigned int kfifo_in(struct kfifo *fifo, const void *from,
-												unsigned int len);
+		unsigned int kfifo_in(struct kfifo *fifo, const void *from, unsigned int len);
 	  ```
 	- The function returns the number of bytes copied into the queue depending on the number of bytes free in the queue. If nothing was copied it will return 0.
 
 - #### Dequeue Data
 	- `kfifo_out()`: It copies at most `len` bytes starting from *out offset* from the queue `fifo` to the buffer pointed at by `to`.
 	  ```c
-			unsigned int kfifo_in(struct kfifo *fifo, const void *from,
-												  unsigned int len);
+		unsigned int kfifo_in(struct kfifo *fifo, const void *from, unsigned int len);
 	  ```
 	- The function returns the number of bytes copied depending on the number of occupied bytes present in the queue.
 	- After dequeued, the data is no longer accessible from the queue.
@@ -413,8 +411,7 @@ struct list_element {
 	   ```
 		- If the caller wants the new UID to be equal or greater than provided `starting_id` then `idr_get_new_above()` can be used instead of `idr_get_new().
 		  ```c
-		  int idr_get_new_above(struct idr *idp, void *ptr, int starting_id,
-																	  int *id)
+		  int idr_get_new_above(struct idr *idp, void *ptr, int starting_id, int *id)
 		  ```
 
 - #### Looking Up a UID
