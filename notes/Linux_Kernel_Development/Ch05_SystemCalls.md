@@ -1,7 +1,7 @@
 
 # Chapter 5: [System Calls]
 
-## Summary
+## **Summary**
 - System Call is an interface between the user-space applications and the kernel. It provides a layer between the hardware and the user-space processes.
 - The System Call layer severs primarily three purposes:
 	1. It provides an abstracted hardware to the user-space applications. It means that the user-space applications don't bother what type of disk, media or filesystem it resides in.
@@ -17,24 +17,21 @@
 - System calls have a defined behavior.
   For example: The system call `getpid()` is defined to return an integer value which is the current process's PID. The implementation of this syscall in kernel is simple:
     ```c
-	SYSCALL_DEFINE0(getpid)
-	{
-		return task_tgid_vnr(current); // returns current->tgid
-	}
-  ```
-- SYSCALL_DEFINE0 is simple a macro that defines a system call with 0 arguments (That's why DEFINE0). The expanded code looks like this:
+    SYSCALL_DEFINE0(getpid) {
+	    return task_tgid_vnr(current); // returns current->tgid}
+    ```
+- `SYSCALL_DEFINE0` is simple a macro that defines a system call with 0 arguments (That's why DEFINE0). The expanded code looks like this:
   ```c
-	  asmlinkage long sys_getpid(void)
- ```  
- - Naming convention: `getpid()` system call is defined as `sys_getpid()`
- - Each system call is assigned a unique *syscall number*.
- - `sys_ni_syscall()`: "Not Implemented" system call.
-   This does nothing except return `-ENOSYS`  which refers to invalid system call.
- - The kernel keeps a list of all registered system calls in a table sys_call_table.
-   For x86-64, the table is define in `arch/i386/kernel/syscall_64.c`
- - System call handler (`system_call()`) in kernel is an exception handler which gets executed when user-space application sends a signal (software interrupt/trap) to kernel to inform that it wants to execute a system call.
- - Before causing the trap into the kernel, the user-space writes the system call number in the `eax` register which is read by system call handler.
- ![[Pasted image 20250516202701.png]]
+  asmlinkage long sys_getpid(void)
+  ```
+- Naming convention: `getpid()` system call is defined as `sys_getpid()`
+- Each system call is assigned a unique *syscall number*.
+- `sys_ni_syscall()`: "Not Implemented" system call.
+- This does nothing except return `-ENOSYS`  which refers to invalid system call.
+- The kernel keeps a list of all registered system calls in a table sys_call_table.
+- For x86-64, the table is define in `arch/i386/kernel/syscall_64.c`
+- System call handler (`system_call()`) in kernel is an exception handler which gets executed when user-space application sends a signal (software interrupt/trap) to kernel to inform that it wants to execute a system call.
+- Before causing the trap into the kernel, the user-space writes the system call number in the `eax` register which is read by system call handler. ![[Pasted image 20250516202701.png]]
 
 - To pass the arguments user-space uses the registers `ebx`, `ecx`, `edx`, `esi`, and `edi`.
 - The return value of the system call is also return via a register `eax`.
@@ -61,15 +58,15 @@ unsigned long *, src,
 unsigned long *, dst,
 unsigned long len)
 {
-unsigned long buf;
-/* copy src, which is in the user’s address space, into buf */
-if (copy_from_user(&buf, src, len))
-return -EFAULT;
-/* copy buf into dst, which is in the user’s address space */
-if (copy_to_user(dst, &buf, len))
-return -EFAULT;
-/* return amount of data copied */
-return len;
+	unsigned long buf;
+	/* copy src, which is in the user’s address space, into buf */
+	if (copy_from_user(&buf, src, len))
+	return -EFAULT;
+	/* copy buf into dst, which is in the user’s address space */
+	if (copy_to_user(dst, &buf, len))
+	return -EFAULT;
+	/* return amount of data copied */
+	return len;
 }
 ```
 
@@ -87,19 +84,19 @@ return len;
 
 ### Register a System Call
 1. Add an entry to the system call table. This needs to be done for each architecture that supports the system call. On adding the new system call (`sys_foo`), it would be given the next subsequent number.
-   ```c
+  ```c
     .long sys_rt_tgsigqueueinfo     /* 335 */
 	.long sys_perf_event_open
 	.long sys_recvmmsg
 	.long sys_foo
-```
+  ```
 2. For each supported architecture, define the system call number in `<asm/unistd.h>`.
    ```c
 	#define __NR_rt_tgsigqueueinfo    335
 	#define __NR_perf_event_open      336
 	#define __NR_recvmmsg             337
 	#define __NR_foo                  338
-```
+   ```
 3. Compile the system call into the kernel image not as a module.
    This can be done by putting the system call in a relevant file under `/kernel` such as `sys.c`, which is home to miscellaneous system calls.
    ```c
@@ -113,7 +110,7 @@ return len;
 	{
 		return THREAD_SIZE;
 	}
-```
+   ```
 
 ### Accessing a System Call from User-Space
 - User application can pull in the function prototypes from the standard headers and link with C library to use your system call (or the library routine that, in turn, uses your syscall call). If you just wrote the system call, it is doubtful that glibc already supports it.
@@ -122,17 +119,17 @@ return len;
 - For example, consider the system call `open()`, defined as:
   ```c
 	long open(const char *filename, int flags, int mode)
-```
+  ```
 	The syscall macro to use this system call without explicit library support would be:
 	```c
 	#define __NR_open 5
 	_syscall3(long, open, const char *, filename, int, flags, int, mode)
-```
+	```
 	Then the application can simple call `open()`.
 	- **Note:** Here `_syscalln` pushes the system call number along with the parameters into the correct registers and finally issues the software interrupt to trap into the kernel.
 - Let's see how to use the new system call in a test application:
   ```c
-	#define __NR_foo 283
+	  #define __NR_foo 283
 	__syscall0(long, foo)
 	
 	int main ()
@@ -142,7 +139,7 @@ return len;
 		printf (“The kernel stack size is %ld\n”, stack_size);
 		return 0;
 	}
-```
+  ```
 
 
 ### Pros, Cons, and Alternatives of System Call
@@ -160,7 +157,7 @@ return len;
 - Certain interfaces, such as semaphores, can be represented as file descriptors and manipulated as such.
 - Add the information as a file to the appropriate location in `sysfs`.
 
-## Quick Recall
+## **Quick Recall**
 - Q1: What will happen if the user-space application are free to access the system resources without the kernel knowledge?
 	- It would be nearly impossible to implement multitasking, and virtual memory, and certainly impossible to do so with stability and security.
 - Q2: Where does the system call table resides?
@@ -170,7 +167,7 @@ return len;
 - Q4: What are the alternatives of a system call?
 	- [[Ch05_SystemCalls#Pros, Cons, and Alternatives of System Call]]
 
-## Hands-On Ideas
+## **Hands-On Ideas**
 1. Write a Simple Custom System Call (Kernel Module Alternative)
 	- The BBB uses an ARM processor and a minimal system, so instead of modifying syscall tables (risky on embedded), you can:
 		- **Write a kernel module** that mimics a syscall (e.g., takes two integers and returns their sum).
