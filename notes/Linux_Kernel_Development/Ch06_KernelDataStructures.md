@@ -117,7 +117,7 @@ struct list_element {
 		unsigned long weight;      /* weight in kilograms */
 		bool is_fantastic;         /* is this fox fantastic? */
 		struct list_head list;     /* list of all fox structures */
-	};
+		};
 	  ```
 	- The list needs to be initialized before it can be used. This can be done in two ways:
 		1. Runtime: The most common way of linked list initialization.
@@ -136,7 +136,7 @@ struct list_element {
 			.weight = 6,
 			.is_fantastic = false,
 			.list = INIT_LIST_HEAD(red_fox.list),
-		};
+			};
 		   ```
 
 - #### List Heads
@@ -170,23 +170,23 @@ struct list_element {
 	- ##### Moving and Splicing (Joining) Linked List Nodes
 		-  `list_move()` - To move a node from one list to another. This function removes the `list` entry from its linked list and adds it to the given list the *after* the `head` element.
 		  ```c
-		  list_move(struct list_head *list, struct list_head *head)
+			  list_move(struct list_head *list, struct list_head *head)
 		  ```
 		- `list_move_tail()` - To move a node from one list to the end of another. This function does the same as list_move(), but inserts the `list` element *before* the `head` entry.
 		  ```c
-		  list_move_tail(struct list_head *list, struct list_head *head)
+			  list_move_tail(struct list_head *list, struct list_head *head)
 		  ```
 		- `list_empty()` - To check whether a list is empty. This returns non-zero if the given list is empty.
 		  ```c
-		  list_empty(struct list_head *head)
+			  list_empty(struct list_head *head)
 		  ```
 		- `list_splice()` - To splice to unconnected lists together. This function splices together two lists by inserting the list pointed to by `list` to the given list after the element `head`.
 		  ```c
-		  list_splice(struct list_head *list, struct list_head *head)
+			  list_splice(struct list_head *list, struct list_head *head)
 		  ```
 		- `list_splice_init()` - To splice two unconnected lists together and reinitialize the old list. This function works the same as `list_splice()`, except that the emptied list pointed to by `list` is reinitialized.
 		  ```c
-		  list_splice_init(struct list_head *list, struct list_head *head)
+			  list_splice_init(struct list_head *list, struct list_head *head)
 		  ```
 
 - #### Traversing Linked Lists
@@ -194,16 +194,16 @@ struct list_element {
 		- But it needs some modification (list_entry()) to traverse over the structures in which the list is embedded.
 	- Most kernel code uses `list_for_each_entry()` macro to iterate over a linked list.
 	  ```c
-	/**
-	 * list_for_each_entry  -       iterate over list of given type
-	 * @pos:        the type * to use as a loop cursor.
-	 * @head:       the head for your list.
-	 * @member:     the name of the list_head within the struct.
-	 */
-	#define list_for_each_entry(pos, head, member)                          \
-	        for (pos = list_first_entry(head, typeof(*pos), member);        \
-	             !list_entry_is_head(pos, head, member);                    \
-	             pos = list_next_entry(pos, member))
+		/**
+		 * list_for_each_entry  -       iterate over list of given type
+		 * @pos:        the type * to use as a loop cursor.
+		 * @head:       the head for your list.
+		 * @member:     the name of the list_head within the struct.
+		 */
+		#define list_for_each_entry(pos, head, member)                          \
+		        for (pos = list_first_entry(head, typeof(*pos), member);        \
+		             !list_entry_is_head(pos, head, member);                    \
+		             pos = list_next_entry(pos, member))
 	  ```
 	- Here `pos` is the pointer to the object containing the `list_head` nodes. Think of it as a return value from `list_entry()`.
 	- `head` is a pointer (like `fox_list` in our example) to the `list_head` head node from which the iteration to be started.
@@ -220,18 +220,19 @@ struct list_element {
 	- The standard iteration methods are not appropriate for this because they rely on the fact that the list entries are not changing. If the current entry is removed in the body of the `for` loop, the subsequent iteration cannot advance to the next (or previous) pointer.
 	- Linux kernel provides following macro to handle such situations:
 	  ```c
-	/**
-	 * list_for_each_entry_safe - iterate over list of given type safe against removal of list entry
-	 * @pos:        the type * to use as a loop cursor.
-	 * @n:          another type * to use as temporary storage
-	 * @head:       the head for your list.
-	 * @member:     the name of the list_head within the struct.
-	 */
-	#define list_for_each_entry_safe(pos, n, head, member)                  \
-	        for (pos = list_first_entry(head, typeof(*pos), member),        \
-	                n = list_next_entry(pos, member);                       \
-	             !list_entry_is_head(pos, head, member);                    \
-	             pos = n, n = list_next_entry(n, member))
+		/**
+		 * list_for_each_entry_safe - iterate over list of given type safe
+									  against removal of list entry
+		 * @pos:        the type * to use as a loop cursor.
+		 * @n:          another type * to use as temporary storage
+		 * @head:       the head for your list.
+		 * @member:     the name of the list_head within the struct.
+		 */
+		#define list_for_each_entry_safe(pos, n, head, member)                  \
+		        for (pos = list_first_entry(head, typeof(*pos), member),        \
+		                n = list_next_entry(pos, member);                       \
+		             !list_entry_is_head(pos, head, member);                    \
+		             pos = n, n = list_next_entry(n, member))
 	  ```
 	- This macro can be used in the same manner as `list_for_each_enty()` except that you provide the `next` pointer, which is of the same type as `pos`.
 	- The next pointer is used by the macro `list_for_each_entry_safe()` to store the next entry in the list, making it safe to remove the current entry.
@@ -287,7 +288,7 @@ struct list_element {
 - #### Enqueue Data
 	- `kfifo_in()`: It copies the `len` bytes of data starting at `from` into the queue `fifo` starting from *in offset*.
 	  ```c
-	unsigned int kfifo_in(struct kfifo *fifo, const void *from,
+			unsigned int kfifo_in(struct kfifo *fifo, const void *from,
 												unsigned int len);
 	  ```
 	- The function returns the number of bytes copied into the queue depending on the number of bytes free in the queue. If nothing was copied it will return 0.
@@ -295,7 +296,7 @@ struct list_element {
 - #### Dequeue Data
 	- `kfifo_out()`: It copies at most `len` bytes starting from *out offset* from the queue `fifo` to the buffer pointed at by `to`.
 	  ```c
-	  unsigned int kfifo_in(struct kfifo *fifo, const void *from,
+			unsigned int kfifo_in(struct kfifo *fifo, const void *from,
 												  unsigned int len);
 	  ```
 	- The function returns the number of bytes copied depending on the number of occupied bytes present in the queue.
@@ -304,7 +305,7 @@ struct list_element {
 - #### Peek Data without Dequeue
 	- `kfifo_out_peek()`: It works same as `kfifo_out`, except that the *out offset* is not incremented.
 	  ```c
-	  unsigned int kfifo_out_peek(struct kfifo *fifo, void *to,
+			unsigned int kfifo_out_peek(struct kfifo *fifo, void *to,
 								  unsigned int len, unsigned offset);
 	  ```
 	- The parameter `offset` specifies an index in the queue; specify 0 to read from the head of the queue, as `kfifo_out()` does.
@@ -312,7 +313,7 @@ struct list_element {
 - #### Obtaining the size of the Queue
 	- `kfifo_size()`: It returns the total size in bytes of the buffer used to store kfifo's queue.
 	  ```c
-	  static inline unsigned int kfifo_size(struct kfifo *fifo);
+		static inline unsigned int kfifo_size(struct kfifo *fifo);
 	  ```
 
 - #### Other functions to access information about the Queue
@@ -329,32 +330,32 @@ struct list_element {
 	- Assume we created a kfifo pointed at `fifo` with a queue size of 8KB.
 	- In this example, we will enqueue simple integers (In reality, it would more complicated, task-specific structures), peek the queue, and the dequeue them.
 	  ```c
-	unsigned int i;
-	/* enqueue [0, 32) to the kfifo named 'fifo' */
-	for (i = 0; i < 32; i++) {
-		kfifo_in(fifo, &i, sizeof(i));
-	}
-	// The kfifo named 'fifo' now contains 0 through 31, inclusive.
-	// We can peek at the first item at the queue and verify it is 0.
-	unsigned int val;
-	int ret;
-	ret = kfifo_peek_out(fifo, &val, sizeof(val), 0);
-	if (ret != sizeof(val)) {
-		return -EINVAL;
-	}
-	printk(KERN_INFO "First item in the queue is %d\n", val); /*should print 0*/
-	// Now, dequeue all the items from the queue
-	/* while there is data in the queue */
-	while(kfifo_avail(fifo)) {
+		unsigned int i;
+		/* enqueue [0, 32) to the kfifo named 'fifo' */
+		for (i = 0; i < 32; i++) {
+			kfifo_in(fifo, &i, sizeof(i));
+		}
+		// The kfifo named 'fifo' now contains 0 through 31, inclusive.
+		// We can peek at the first item at the queue and verify it is 0.
 		unsigned int val;
 		int ret;
-		/* read it, one integer at at time */
-		ret = kfifo_out(fifo, &val, sizeof(val));
+		ret = kfifo_peek_out(fifo, &val, sizeof(val), 0);
 		if (ret != sizeof(val)) {
 			return -EINVAL;
 		}
-		printk(KERN_INFO "%u\n", val);
-	}
+		printk(KERN_INFO "First item in the queue is %d\n", val); /*should print 0*/
+		// Now, dequeue all the items from the queue
+		/* while there is data in the queue */
+		while(kfifo_avail(fifo)) {
+			unsigned int val;
+			int ret;
+			/* read it, one integer at at time */
+			ret = kfifo_out(fifo, &val, sizeof(val));
+			if (ret != sizeof(val)) {
+				return -EINVAL;
+			}
+			printk(KERN_INFO "%u\n", val);
+		}
 	  ```
 
 - The above test code prints 0 through 31, inclusive, and in that order.
@@ -396,8 +397,8 @@ struct list_element {
 	  ```
 	- Example:
 	  ```c
-	struct idr id_huh;     /* statically define idr structure */
-	idr_init(&id_huh);     /* initialize provided idr structure */
+		struct idr id_huh;     /* statically define idr structure */
+		idr_init(&id_huh);     /* initialize provided idr structure */
 	  ```
 
 - #### Allocating a new UID
