@@ -22,13 +22,12 @@
 		- **Why** `atomic_t`**:** Ensures atomic use, prevents compiler optimization errors, hides architecture differences.
 		- **Example**:
 		  ```c
-		atomic_t v;                   /* define v */
-		atomic_t u = ATOMIC_INIT(0);  /* define u and initialize it to zero */
-		atomic_set(&v, 4);    /* v = 4 (atomically) */
-		atomic_add(2, &v);    /* v = v + 2 = 6 (atomically) */
-		atomic_inc(&v);       /* v = v + 1 = 7 (atomically) */
-		
-		printk(“%d\n”, atomic_read(&v)); /* will print “7” */
+			atomic_t v;                   /* define v */
+			atomic_t u = ATOMIC_INIT(0); /* define u and initialize it to zero */
+			atomic_set(&v, 4);    /* v = 4 (atomically) */
+			atomic_add(2, &v);    /* v = v + 2 = 6 (atomically) */
+			atomic_inc(&v);       /* v = v + 1 = 7 (atomically) */
+			printk(“%d\n”, atomic_read(&v)); /* will print “7” */
 		  ```
 		- **Atomic Integer Methods:**
 			- `ATOMIC_INIT(int i)` - At declaration, initialize to i.
@@ -56,9 +55,9 @@
 	- #### 64-Bit Atomic Operations
 		- **Type**: `atomic64_t` (64-bit, `volatile long counter`), for 64-bit architectures.
 		  ```c
-		typedef struct {
-			volatile long counter;
-		} atomic64_t;
+			typedef struct {
+				volatile long counter;
+			} atomic64_t;
 		  ```
 		- **Atomic Integer Methods:** Similar to `atomic_t` (e.g., `atomic64_inc`, `atomic64_read`), prefixed with *atomic64*.
 		- **Support**: Available on 64-bit architectures; some 32-bit (e.g., x86-32) support it.
@@ -70,19 +69,19 @@
 		- **Use Case**: Manipulate flags or hardware registers atomically.
 		- **Example**:
 		  ```c
-		set_bit(0, &word);      /* bit zero is now set (atomically) */
-		set_bit(1, &word);      /* bit one is now set (atomically) */
-		printk(“%ul\n”, word);  /* will print “3” */
-		clear_bit(1, &word);    /* bit one is now unset (atomically) */
-		change_bit(0, &word);   /* bit zero is flipped; now it is unset (atomically) */
-		
-		/* atomically sets bit zero and returns the previous value (zero) */
-		if (test_and_set_bit(0, &word)) {
-			/* never true ... */
-		}
-		
-		/* the following is legal; you can mix atomic bit instructions with normal C */
-		word = 7;
+			set_bit(0, &word);      /* bit zero is now set (atomically) */
+			set_bit(1, &word);      /* bit one is now set (atomically) */
+			printk(“%ul\n”, word);  /* will print “3” */
+			clear_bit(1, &word);    /* bit one is now unset (atomically) */
+			change_bit(0, &word);   /* bit zero is flipped; now it is unset (atomically) */
+
+			/* atomically sets bit zero and returns the previous value (zero) */
+			if (test_and_set_bit(0, &word)) {
+				/* never true ... */
+			}
+
+			/* the following is legal; you can mix atomic bit instructions with normal C */
+			word = 7;
 		  ```
 		- **Nonatomic Variants**: Prefixed __ (e.g., `__set_bit`), faster if data already protected.
 		- **Use Case**: Manipulate flags or hardware registers atomically.
@@ -446,18 +445,18 @@
 	- **Initialization**: `seqlock_t lock = DEFINE_SEQLOCK(mr_seq_lock);`
 	- **Usage**:
 		- Write:
-		  ```c
+			```c
 			write_seqlock(&mr_seq_lock);
 			/* write lock is obtained... */
 			write_sequnlock(&mr_seq_lock);
 		  ```
-		  - Read:
+		- Read:
 		    ```c
 			do {
 				seq = read_seqbegin(&mr_seq_lock);
 				/* read data here ... */
 			} while (read_seqretry(&mr_seq_lock, seq));
-		    ```
+			```
 	- **Properties**:
 		- Favors writers; readers retry if writers active (unlike reader-writer locks).
 		- Lightweight for readers, scalable for many readers.
@@ -597,13 +596,13 @@
 
 ## **Quick Recall**
 - **Q: Why are atomic operations used in the kernel?**
-    - **A**: Ensure indivisible updates to counters or flags (e.g., atomic_inc) without locks, preventing race conditions.
+    - **A**: Ensure indivisible updates to counters or flags (e.g., `atomic_inc`) without locks, preventing race conditions.
 - **Q: What is the main difference between spin locks and semaphores?**
 	- **A**: Spin locks busy-wait (short holds, interrupt-safe); semaphores sleep (long holds, process context only).
 - **Q: When are reader-writer locks useful?**
 	- **A**: For data with many readers and few writers, allowing concurrent reads but exclusive writes.
 - **Q: How do mutexes differ from semaphores?**
-	- **A**: Mutexes are simpler, count=1, stricter rules (no recursive locks, same context), better for mutual exclusion.
+	- **A**: Mutexes are simpler, `count=1`, stricter rules (no recursive locks, same context), better for mutual exclusion.
 - **Q: What do completion variables do?**
 	- **A**: Synchronize tasks; one waits (wait_for_completion) until another signals (complete) an event.
 - **Q: Why was the Big Kernel Lock (BKL) introduced?**
