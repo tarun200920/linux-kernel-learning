@@ -325,8 +325,9 @@
 	struct timespec {
 	__kernel_time_t tv_sec;    /* seconds */
 	long tv_nsec;              /* nanoseconds */
-};
+	};
   ```
+
 - `xtime.tv_sec` - Seconds since epoch (January 1, 1970, UTC).
 - `xtime.tv_nsec` - Nanoseconds within the last second.
 - **Access**:
