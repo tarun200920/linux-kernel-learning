@@ -337,7 +337,7 @@
 
 - How does the ASoC core know what your DAI is capable of? You declare it using this structure, typically inside your `snd_soc_dai_driver`.
   ```c
-	  struct snd_pcm_stream {
+	struct snd_pcm_stream {
 	    const char *stream_name; // "Playback" or "Capture"
 	    u64 formats;             // Bitmask of supported formats (e.g., 16-bit, 24-bit)
 	    unsigned int rates;      // Bitmask of supported sample rates (e.g., 44.1k, 48k)
@@ -346,7 +346,7 @@
 	    unsigned int channels_min; // Minimum channels (e.g., 1 for mono)
 	    unsigned int channels_max; // Maximum channels (e.g., 2 for stereo)
 	    ...
-};
+	};
   ```
 
 - **Purpose:** This structure is a capabilities statement. It's how your driver tells ALSA, "For playback, I can handle 16-bit and 24-bit formats, I support sample rates of 48 kHz and 96 kHz, and I can do stereo."
